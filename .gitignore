@@ -1,5 +1,4 @@
 .vscode/
 
-# Build artifacts
-*.o
-*.a
+# Build directory
+build/

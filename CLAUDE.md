@@ -33,8 +33,11 @@ make clean
 ```
 
 The build system uses:
-- GCC with `-Wall -Wextra -std=c99` flags
-- Creates `libfat12.a` static library from `src/fat12.c`
+- GCC with `-Wall -Wextra -std=c99` flags  
+- Organized build directory structure:
+  - `build/obj/` - Object files (.o)
+  - `build/lib/` - Static library (`libfat12.a`)
+- Clean separation between source and build artifacts
 - No test framework currently configured
 
 ## Code Conventions

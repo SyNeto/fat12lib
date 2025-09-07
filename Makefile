@@ -2,17 +2,27 @@ CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -Iinclude
 TARGET = fat12
 SRC = src/fat12.c
-OBJ = $(SRC:.c=.o)
+BUILD_DIR = build
+OBJ_DIR = $(BUILD_DIR)/obj
+LIB_DIR = $(BUILD_DIR)/lib
+OBJ = $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(SRC))
+LIB = $(LIB_DIR)/lib$(TARGET).a
 
-all: lib$(TARGET).a
+all: $(LIB)
 
-lib$(TARGET).a: $(OBJ)
-	ar rcs lib$(TARGET).a $(OBJ)
+$(LIB): $(OBJ) | $(LIB_DIR)
+	ar rcs $(LIB) $(OBJ)
 
-%.o: %.c
+$(OBJ_DIR)/%.o: src/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
+
+$(LIB_DIR):
+	mkdir -p $(LIB_DIR)
+
 clean:
-	rm -f $(OBJ) lib$(TARGET).a
+	rm -rf $(BUILD_DIR)
 
 .PHONY: all clean
