@@ -1,12 +1,6 @@
 #include "test_common.h"
 #include "../include/fat12.h"
 
-// Need access to internal macros for testing
-#define BOOT_SECTOR_OFFSET 0
-#define FAT_START(boot) (BOOT_SECTOR_OFFSET + (boot->reserved_sectors * boot->bytes_per_sector))
-#define ROOT_DIR_START(boot) (FAT_START(boot) + (boot->fat_count * boot->sectors_per_fat * boot->bytes_per_sector))
-#define DATA_START(boot) (ROOT_DIR_START(boot) + (boot->root_entries * 32 / boot-> bytes_per_sector))
-
 void test_data_start_macro() {
     BootSector boot;
     
@@ -31,8 +25,7 @@ void test_data_start_macro() {
     TEST_ASSERT_EQ(expected_fat_start, fat_start, "FAT_START calculation");
     TEST_ASSERT_EQ(expected_root_start, root_dir_start, "ROOT_DIR_START calculation");
     
-    // This test should FAIL with current implementation due to truncation bug
-    TEST_ASSERT_EQ(expected_data_start, data_start, "DATA_START calculation (this may fail due to truncation bug)");
+    TEST_ASSERT_EQ(expected_data_start, data_start, "DATA_START calculation works correctly");
     
     // Test case 2: Edge case with truncation - should expose the bug
     create_mock_boot_sector(&boot, 512, 1, 1, 2, 100, 2880, 9); // 100 root entries
@@ -59,8 +52,8 @@ void test_data_start_macro() {
     printf("Expected (wrong): %d\n", data_start_wrong);
     printf("Expected (correct): %d\n", data_start_correct);
     
-    // This should fail with current buggy implementation
-    TEST_ASSERT_NEQ(data_start_correct, data_start, "DATA_START should be buggy (truncated) - this test documents the bug");
+    // Now should work correctly with ceiling division
+    TEST_ASSERT_EQ(data_start_correct, data_start, "DATA_START uses correct ceiling division");
 }
 
 void test_data_start_sectors_calculation() {
@@ -84,9 +77,9 @@ void test_data_start_sectors_calculation() {
     printf("data_start_sectors (buggy method): %d\n", data_start_sectors_buggy);
     printf("data_start_sectors (correct method): %d\n", data_start_sectors_correct);
     
-    // Document the double-truncation bug
-    TEST_ASSERT_NEQ(data_start_sectors_correct, data_start_sectors_buggy, 
-                   "Current calculation should be wrong due to double truncation");
+    // Now both methods should give same result
+    TEST_ASSERT_EQ(data_start_sectors_correct, data_start_sectors_buggy, 
+                   "Both calculation methods should match after fixes");
     
     // Show the impact
     int total_data_sectors_buggy = boot.total_sectors - data_start_sectors_buggy;

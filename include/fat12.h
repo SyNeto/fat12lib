@@ -4,6 +4,11 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#define BOOT_SECTOR_OFFSET 0
+#define FAT_START(boot) (BOOT_SECTOR_OFFSET + (boot->reserved_sectors * boot->bytes_per_sector))
+#define ROOT_DIR_START(boot) (FAT_START(boot) + (boot->fat_count * boot->sectors_per_fat * boot->bytes_per_sector))
+#define DATA_START(boot) (ROOT_DIR_START(boot) + ((boot->root_entries * 32 + boot->bytes_per_sector - 1) / boot->bytes_per_sector) * boot->bytes_per_sector)
+
 /**
  * @brief Represents the boot sector of a FAT12 file system
  * 
