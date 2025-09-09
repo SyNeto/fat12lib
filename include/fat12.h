@@ -4,9 +4,28 @@
 #include <stdint.h>
 #include <stdio.h>
 
+/**
+ * @brief FAT12 Filesystem Layout Calculation Macros
+ * 
+ * These macros calculate byte offsets for different sections of a FAT12 disk image.
+ * The layout is: Boot Sector -> Reserved Sectors -> FAT Tables -> Root Directory -> Data Area
+ */
+
+/** @brief Starting offset of the boot sector (always at beginning of disk) */
 #define BOOT_SECTOR_OFFSET 0
+
+/** @brief Calculate starting byte offset of the first FAT table */
 #define FAT_START(boot) (BOOT_SECTOR_OFFSET + (boot->reserved_sectors * boot->bytes_per_sector))
+
+/** @brief Calculate starting byte offset of the root directory */
 #define ROOT_DIR_START(boot) (FAT_START(boot) + (boot->fat_count * boot->sectors_per_fat * boot->bytes_per_sector))
+
+/** 
+ * @brief Calculate starting byte offset of the data area (clusters 2+)
+ * 
+ * Uses ceiling division: (root_entries * 32 + sector_size - 1) / sector_size
+ * to ensure root directory occupies complete sectors.
+ */
 #define DATA_START(boot) (ROOT_DIR_START(boot) + ((boot->root_entries * 32 + boot->bytes_per_sector - 1) / boot->bytes_per_sector) * boot->bytes_per_sector)
 
 /**
