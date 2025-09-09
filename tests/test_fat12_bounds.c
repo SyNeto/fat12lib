@@ -36,11 +36,13 @@ void test_get_fat12_entry_bounds() {
     int byte_offset = invalid_cluster * 3 / 2;
     printf("Would access byte offset: %d (FAT size: %d)\n", byte_offset, fat_table_size);
     
-    if (byte_offset >= fat_table_size) {
-        TEST_FAIL("get_fat12_entry allows buffer overrun - cluster %d accesses offset %d (size: %d)", 
-                  invalid_cluster, byte_offset, fat_table_size);
+    // Actually test that the function prevents buffer overrun
+    uint16_t result = get_fat12_entry(fat_table, fat_table_size, invalid_cluster);
+    if (result == 0xFFFF) {
+        TEST_PASS("get_fat12_entry correctly rejects invalid cluster (returns 0xFFFF)");
     } else {
-        TEST_PASS("Invalid cluster is unexpectedly within bounds");
+        TEST_FAIL("get_fat12_entry should return 0xFFFF for invalid cluster %d, got 0x%03X", 
+                  invalid_cluster, result);
     }
     
     // Test extremely large cluster number
@@ -91,11 +93,13 @@ void test_set_fat12_entry_bounds() {
     // Calculate what bytes would be accessed
     int byte_offset = invalid_cluster * 3 / 2;
     
-    if (byte_offset + 1 >= fat_table_size) {
-        TEST_FAIL("set_fat12_entry would cause buffer overrun - cluster %d accesses bytes %d-%d (size: %d)", 
-                  invalid_cluster, byte_offset, byte_offset + 1, fat_table_size);
+    // Actually test that the function prevents buffer overrun
+    int result = set_fat12_entry(fat_table, fat_table_size, invalid_cluster, 0x123);
+    if (result == -1) {
+        TEST_PASS("set_fat12_entry correctly rejects invalid cluster (returns -1)");
     } else {
-        TEST_PASS("Invalid cluster write is unexpectedly within bounds");
+        TEST_FAIL("set_fat12_entry should return -1 for invalid cluster %d, got %d", 
+                  invalid_cluster, result);
     }
     
     // Test extremely large cluster write
