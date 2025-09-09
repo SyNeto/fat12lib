@@ -18,8 +18,9 @@ A C library for reading, analyzing, and manipulating FAT12 disk images. Built wi
 
 - **FAT Table Management** 
   - Safe 12-bit FAT entry reading and writing with bounds checking
-  - Memory-efficient hybrid approach (VLA for temporary operations, malloc for persistent data)
+  - Dynamic memory allocation with goto cleanup pattern for resource safety
   - Buffer overrun prevention and input validation
+  - MSVC and cross-compiler compatibility
 
 - **Disk Analysis**
   - Complete filesystem structure analysis (clusters, free space, usage statistics)
@@ -61,9 +62,9 @@ The following features are planned for implementation:
 ## 🛠️ Building
 
 ### Requirements
-- GCC with C17 support
-- Make
-- POSIX-compliant system (Linux, macOS, WSL)
+- C17-compliant compiler (GCC, Clang, MSVC)
+- Make (or equivalent build system)
+- Compatible with: Linux, macOS, Windows (including WSL, Cygwin, MSVC)
 
 ### Quick Start
 ```bash
@@ -207,9 +208,10 @@ See our [Project Board](../../projects) for prioritized work items:
 ## 📚 Architecture
 
 ### Memory Management
-- **Hybrid Approach**: VLA for temporary operations, malloc for persistent data
+- **Dynamic Allocation**: malloc/free for all variable-sized data structures
 - **Goto Cleanup**: Consistent error handling with resource cleanup
 - **Bounds Checking**: All array access is validated
+- **Cross-Compiler Compatibility**: No VLA usage for MSVC compatibility
 
 ### Security Features
 - **Buffer Overrun Prevention**: Comprehensive bounds checking on all operations

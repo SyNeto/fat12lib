@@ -146,6 +146,7 @@ int set_fat12_entry(uint8_t* fat_table, int fat_size_bytes, int cluster, uint16_
 
 int analyze_fat(FILE *img, const BootSector *boot, DiskInfo *info)
 {
+    uint8_t* fat_table = NULL;
     int data_start_sectors = DATA_START(boot) / boot->bytes_per_sector;
     int total_data_sectors = boot->total_sectors - data_start_sectors;
     int total_clusters = total_data_sectors / boot->sectors_per_cluster;
@@ -155,15 +156,16 @@ int analyze_fat(FILE *img, const BootSector *boot, DiskInfo *info)
     }
     
     int fat_size_bytes = boot->sectors_per_fat * boot->bytes_per_sector;
-    uint8_t fat_table[fat_size_bytes];
     
-    if (fseek(img, FAT_START(boot), SEEK_SET) != 0) {
-        return -3;
+    if (fat_size_bytes <= 0 || fat_size_bytes > 65536) {
+        return -2;
     }
     
-    if (fread(fat_table, fat_size_bytes, 1, img) != 1) {
-        return -4;
-    }
+    fat_table = malloc(fat_size_bytes);
+    if (!fat_table) goto error;
+    
+    if (fseek(img, FAT_START(boot), SEEK_SET) != 0) goto error;
+    if (fread(fat_table, fat_size_bytes, 1, img) != 1) goto error;
     
     info->total_clusters = total_clusters;
     info->used_clusters = 0;
@@ -185,7 +187,12 @@ int analyze_fat(FILE *img, const BootSector *boot, DiskInfo *info)
         }
     }
     
+    free(fat_table);
     return 0;
+    
+error:
+    free(fat_table);
+    return -3;
 }
 
 void print_disk_info(const DiskInfo *info)
