@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -Iinclude
+CFLAGS = -Wall -Wextra -std=c17 -Iinclude
 TARGET = fat12
 SRC = src/fat12.c
 BUILD_DIR = build

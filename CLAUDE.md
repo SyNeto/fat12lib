@@ -33,7 +33,7 @@ make clean
 ```
 
 The build system uses:
-- GCC with `-Wall -Wextra -std=c99` flags  
+- GCC with `-Wall -Wextra -std=c17` flags  
 - Organized build directory structure:
   - `build/obj/` - Object files (.o)
   - `build/lib/` - Static library (`libfat12.a`)
@@ -42,8 +42,8 @@ The build system uses:
 
 ## Code Conventions
 
-- C99 standard compliance
+- C17 standard compliance
 - Structured types for FAT12 data representation
 - Macro definitions for filesystem layout calculations (FAT_START, ROOT_DIR_START, DATA_START)
-- Spanish language output in `print_disk_info()` function
+- English language output in `print_disk_info()` function
 - 32-byte directory entry size assumption for root directory calculations

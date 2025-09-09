@@ -18,7 +18,7 @@ typedef struct {
 } BootSector;
 
 /**
- * @brief Contains information acout the disk image
+ * @brief Contains information about the disk image
  */
 typedef struct {
     BootSector boot_sector;
@@ -37,7 +37,7 @@ typedef struct {
 int read_boot_sector(FILE *img, BootSector *boot);
 
 /**
- * @brief Analyze the FAT and gathers information about the disk image.
+ * @brief Analyzes the FAT and gathers information about the disk image.
  * 
  * @param img Pointer to the file representing the disk image.
  * @param boot Pointer to the BootSector structure containing the boot sector data.
@@ -53,5 +53,39 @@ int analyze_fat(FILE *img, const BootSector *boot, DiskInfo *info);
  * @return void
  */
 void print_disk_info(const DiskInfo *info);
+
+/**
+ * @brief Loads the FAT table into memory for editing purposes.
+ * 
+ * @param img Pointer to the file representing the disk image.
+ * @param boot Pointer to the BootSector structure containing the boot sector data.
+ * @return Pointer to the FAT table in memory, or NULL on failure.
+ */
+uint8_t* load_fat_table(FILE *img, const BootSector *boot);
+
+/**
+ * @brief Frees the memory allocated for the FAT table.
+ * 
+ * @param fat_table Pointer to the FAT table to free.
+ */
+void free_fat_table(uint8_t* fat_table);
+
+/**
+ * @brief Extracts a 12-bit FAT12 entry from the FAT table.
+ * 
+ * @param fat_table Pointer to the FAT table loaded in memory.
+ * @param cluster Cluster number (starting from 0).
+ * @return 12-bit FAT entry value (0x000 to 0xFFF).
+ */
+uint16_t get_fat12_entry(const uint8_t* fat_table, int cluster);
+
+/**
+ * @brief Sets a 12-bit FAT12 entry in the FAT table.
+ * 
+ * @param fat_table Pointer to the FAT table loaded in memory.
+ * @param cluster Cluster number (starting from 0).
+ * @param value 12-bit value to set (0x000 to 0xFFF).
+ */
+void set_fat12_entry(uint8_t* fat_table, int cluster, uint16_t value);
 
 #endif // FAT12_H
