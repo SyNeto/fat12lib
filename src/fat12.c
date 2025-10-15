@@ -147,7 +147,8 @@ int set_fat12_entry(uint8_t* fat_table, int fat_size_bytes, int cluster, uint16_
 int analyze_fat(FILE *img, const BootSector *boot, DiskInfo *info)
 {
     uint8_t* fat_table = NULL;
-    int data_start_sectors = DATA_START(boot) / boot->bytes_per_sector;
+    size_t data_start_bytes = calculate_data_area_offset(boot);
+    int data_start_sectors = data_start_bytes / boot->bytes_per_sector;
     int total_data_sectors = boot->total_sectors - data_start_sectors;
     int total_clusters = total_data_sectors / boot->sectors_per_cluster;
     

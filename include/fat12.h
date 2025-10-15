@@ -6,22 +6,34 @@
 
 /**
  * @brief FAT12 Filesystem Layout Calculation Macros
- * 
+ *
  * These macros calculate byte offsets for different sections of a FAT12 disk image.
  * The layout is: Boot Sector -> Reserved Sectors -> FAT Tables -> Root Directory -> Data Area
+ *
+ * @deprecated These macros are deprecated. Use the corresponding functions instead:
+ *             - FAT_START() is internal only
+ *             - ROOT_DIR_START() -> use calculate_root_directory_offset()
+ *             - DATA_START() -> use calculate_data_area_offset()
  */
 
 /** @brief Starting offset of the boot sector (always at beginning of disk) */
 #define BOOT_SECTOR_OFFSET 0
 
-/** @brief Calculate starting byte offset of the first FAT table */
+/**
+ * @brief Calculate starting byte offset of the first FAT table
+ * @deprecated Internal use only. For layout calculations, use the new offset functions.
+ */
 #define FAT_START(boot) (BOOT_SECTOR_OFFSET + (boot->reserved_sectors * boot->bytes_per_sector))
 
-/** @brief Calculate starting byte offset of the root directory */
+/**
+ * @brief Calculate starting byte offset of the root directory
+ * @deprecated Use calculate_root_directory_offset() instead
+ */
 #define ROOT_DIR_START(boot) (FAT_START(boot) + (boot->fat_count * boot->sectors_per_fat * boot->bytes_per_sector))
 
 /**
  * @brief Calculate starting byte offset of the data area (clusters 2+)
+ * @deprecated Use calculate_data_area_offset() instead
  *
  * Uses ceiling division: (root_entries * 32 + sector_size - 1) / sector_size
  * to ensure root directory occupies complete sectors.
