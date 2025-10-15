@@ -16,11 +16,17 @@ A C library for reading, analyzing, and manipulating FAT12 disk images. Built wi
   - Comprehensive validation (power-of-2 clusters, layout consistency, etc.)
   - Enhanced error reporting with specific error codes
 
-- **FAT Table Management** 
+- **FAT Table Management**
   - Safe 12-bit FAT entry reading and writing with bounds checking
   - Dynamic memory allocation with goto cleanup pattern for resource safety
   - Buffer overrun prevention and input validation
   - MSVC and cross-compiler compatibility
+
+- **Disk Layout Calculations**
+  - Dynamic offset calculation for all disk sections (root directory, data area, clusters)
+  - No hardcoded offsets - supports any valid FAT12 configuration
+  - Cluster-to-offset conversion with full validation (FAT12 range: 2-4084)
+  - Helper macros for cluster size calculations
 
 - **Disk Analysis**
   - Complete filesystem structure analysis (clusters, free space, usage statistics)
@@ -52,6 +58,7 @@ The following features are planned for implementation:
 |-----------|--------|-------|----------|
 | Boot Sector Parsing | ✅ Complete | 12/12 | 100% |
 | FAT Table Operations | ✅ Complete | 21/21 | 100% |
+| Layout Offset Calculations | ✅ Complete | 22/22 | 100% |
 | Input Validation | ✅ Complete | 17/17 | 100% |
 | Memory Management | ✅ Complete | 6/6 | 100% |
 | Struct Alignment | ✅ Complete | 10/10 | 100% |
@@ -90,8 +97,9 @@ make test-calculations      # Test FAT12 calculations
 make test-bounds           # Test bounds checking
 make test-validation       # Test input validation
 make test-alignment        # Test struct alignment
-make test-fixed           # Test boot sector reading
-make clean                # Clean all build artifacts
+make test-fixed            # Test boot sector reading
+make test-layout           # Test layout offset calculations
+make clean                 # Clean all build artifacts
 ```
 
 ## 📖 Usage
@@ -126,6 +134,25 @@ int main() {
 }
 ```
 
+### Dynamic Offset Calculations
+```c
+// Calculate disk layout offsets dynamically
+size_t root_dir_offset = calculate_root_directory_offset(&boot);
+size_t root_dir_size = calculate_root_directory_size(&boot);
+size_t data_area_offset = calculate_data_area_offset(&boot);
+
+// Convert cluster number to physical offset
+size_t cluster_offset = cluster_to_offset(cluster_num, &boot);
+if (cluster_offset == 0) {
+    fprintf(stderr, "Invalid cluster number\n");
+    return -1;
+}
+
+// Seek to cluster location and read data
+fseek(img, cluster_offset, SEEK_SET);
+fread(buffer, CLUSTER_SIZE(&boot), 1, img);
+```
+
 ### Advanced FAT Table Manipulation
 ```c
 // Load FAT table for editing
@@ -145,18 +172,19 @@ free_fat_table(fat_table);
 
 ## 🧪 Testing
 
-The library includes a comprehensive test suite with 77 tests across 5 categories:
+The library includes a comprehensive test suite with **88 tests across 6 categories**:
 
 ```bash
 # Run all tests
 make test
 
 # Individual test suites
-make test-calculations  # FAT12 layout calculations
-make test-bounds       # Buffer overrun prevention  
+make test-calculations  # FAT12 layout calculations (macro validation)
+make test-bounds       # Buffer overrun prevention
 make test-validation   # Input validation and error handling
 make test-alignment    # Memory layout and struct padding
 make test-fixed        # Boot sector parsing correctness
+make test-layout       # Dynamic offset calculation functions
 ```
 
 All tests achieve **100% pass rate** with extensive coverage of edge cases, error conditions, and security scenarios.
